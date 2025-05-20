@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eco Actions Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { margin-top: 10px; display: block; }
+  </style>
+</head>
+<body>
+  <h2>Eco-Friendly Actions</h2>
+  <ol id="actions"></ol>
+
+  <label for="name">Enter your (real) name:</label>
+  <input type="text" id="name" />
+
+  <label for="result">Enter your result number (1–7):</label>
+  <input type="number" id="result" min="1" max="7" />
+
+  <button onclick="submitResult()">Submit</button>
+
+  <h3>People with matching results:</h3>
+  <ul id="resultList"></ul>
+
+  <script>
+    const actions = [
+      "Preserving resources: Eat less meat - try the tofu option in the cafeteria tomorrow instead! From a vegetarian’s perspective, it’s pretty good.",
+      "Consumerism: Start a 'no new stuff' week — use what you already have.",
+      "Energy usage: Do your homework outside to save lights inside.",
+      "Energy usage: Take a short, cold shower tomorrow - it helps with recovery and saves energy!",
+      "Litter/pollution: Pick up one piece of litter each time you go outside (if you see any).",
+      "Fast Fashion: Rework an old t-shirt - cropping it is an easy start.",
+      "Preserving resources: Air dry your hands after using the restroom rather than using a paper towel."
+    ];
+
+    const actionsList = document.getElementById("actions");
+    actions.forEach((action, i) => {
+      const li = document.createElement("li");
+      li.textContent = `(${i + 1}) ${action}`;
+      actionsList.appendChild(li);
+    });
+
+    function submitResult() {
+      const name = document.getElementById("name").value.trim();
+      const result = document.getElementById("result").value.trim();
+
+      if (!name || !result || result < 1 || result > actions.length) {
+        alert("Please enter a valid name and result number (1–7).");
+        return;
+      }
+
+      let data = JSON.parse(localStorage.getItem("results") || "{}");
+
+      if (!data[result]) {
+        data[result] = [];
+      }
+      data[result].push(name);
+      localStorage.setItem("results", JSON.stringify(data));
+
+      displayAllResults(data);
+    }
+
+    function displayAllResults(data) {
+      const list = document.getElementById("resultList");
+      list.innerHTML = "";
+      for (const key in data) {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>Result ${key}:</strong> ${data[key].join(", ")}`;
+        list.appendChild(li);
+      }
+    }
+
+    // Load existing data on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      const data = JSON.parse(localStorage.getItem("results") || "{}");
+      displayAllResults(data);
+    });
+  </script>
+</body>
+</html>
