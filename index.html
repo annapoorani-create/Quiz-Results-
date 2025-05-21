@@ -24,6 +24,8 @@
   <ul id="resultList"></ul>
 
   <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycby0enxyG5gvn0Cp7TjvanYdd4COpaIyIvvwy4ZXZf89tTXju3LnHsdZtHrwpcMRa_hFFA/exec"; // 👈 Replace this
+
     const actions = [
       "Preserving resources: Eat less meat - try the tofu option in the cafeteria tomorrow instead! From a vegetarian’s perspective, it’s pretty good.",
       "Consumerism: Start a 'no new stuff' week — use what you already have.",
@@ -41,7 +43,7 @@
       actionsList.appendChild(li);
     });
 
-    function submitResult() {
+    async function submitResult() {
       const name = document.getElementById("name").value.trim();
       const result = document.getElementById("result").value.trim();
 
@@ -50,20 +52,22 @@
         return;
       }
 
-      let data = JSON.parse(localStorage.getItem("results") || "{}");
+      await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify({ name, result }),
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (!data[result]) {
-        data[result] = [];
-      }
-      data[result].push(name);
-      localStorage.setItem("results", JSON.stringify(data));
-
-      displayAllResults(data);
+      loadResults(); // Refresh results
     }
 
-    function displayAllResults(data) {
+    async function loadResults() {
+      const response = await fetch(scriptURL);
+      const data = await response.json();
+
       const list = document.getElementById("resultList");
       list.innerHTML = "";
+
       for (const key in data) {
         const li = document.createElement("li");
         li.innerHTML = `<strong>Result ${key}:</strong> ${data[key].join(", ")}`;
@@ -71,11 +75,7 @@
       }
     }
 
-    // Load existing data on page load
-    window.addEventListener("DOMContentLoaded", () => {
-      const data = JSON.parse(localStorage.getItem("results") || "{}");
-      displayAllResults(data);
-    });
+    window.addEventListener("DOMContentLoaded", loadResults);
   </script>
 </body>
 </html>
